@@ -1,0 +1,40 @@
+{
+  "dataset_name": "MBD-mini targets",
+  "dataset_origin": "Sber AI Lab / ai-lab MBD-mini",
+  "source_url": "https://huggingface.co/datasets/ai-lab/MBD-mini",
+  "paper_url": "https://doi.org/10.48550/arXiv.2409.17587",
+  "raw_target_rows": 1202688,
+  "raw_clients": 100224,
+  "months": [
+    "2022-02-28",
+    "2022-03-31",
+    "2022-04-30",
+    "2022-05-31",
+    "2022-06-30",
+    "2022-07-31",
+    "2022-08-31",
+    "2022-09-30",
+    "2022-10-31",
+    "2022-11-30",
+    "2022-12-31",
+    "2023-01-31"
+  ],
+  "min_user_positive_events": 2,
+  "max_users": null,
+  "positive_clients_before_filtering": 10411,
+  "positive_events_before_filtering": 13529,
+  "n_users": 2325,
+  "n_items": 4,
+  "n_positive_interactions": 5443,
+  "timestamp_min": "2022-02-28T00:00:00",
+  "timestamp_max": "2023-01-31T00:00:00",
+  "product_positive_counts": {
+    "mbd_product_1": 1912,
+    "mbd_product_2": 328,
+    "mbd_product_3": 1628,
+    "mbd_product_4": 1575
+  },
+  "train_interactions": 2624,
+  "holdout_interactions": 1984,
+  "evaluated_users": 1915
+}

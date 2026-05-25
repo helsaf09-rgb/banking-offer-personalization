@@ -1,0 +1,5 @@
+offer_id,offer_name,target_name,buyer_count,event_count,first_month,last_month
+mbd_product_1,MBD product 1,target_1,1452,1912,2022-02-28,2023-01-31
+mbd_product_3,MBD product 3,target_3,1278,1628,2022-02-28,2023-01-31
+mbd_product_4,MBD product 4,target_4,1013,1575,2022-02-28,2023-01-31
+mbd_product_2,MBD product 2,target_2,241,328,2022-02-28,2023-01-31

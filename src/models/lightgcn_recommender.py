@@ -129,18 +129,26 @@ class LightGCNRecommender:
         if self._n_items <= 1:
             raise ValueError("LightGCN requires at least two items.")
 
+        eligible_mask = np.asarray(
+            [
+                len(self._user_positive_items[int(user_idx)]) < self._n_items
+                for user_idx in positive_pairs[:, 0]
+            ],
+            dtype=bool,
+        )
+        eligible_pairs = positive_pairs[eligible_mask]
+        if len(eligible_pairs) == 0:
+            raise ValueError("LightGCN requires at least one user with an unobserved negative item.")
+
         n_samples = max(self.config.batch_size, int(self.config.samples_per_epoch))
-        pair_idx = rng.integers(0, len(positive_pairs), size=n_samples)
-        sampled_pairs = positive_pairs[pair_idx]
+        pair_idx = rng.integers(0, len(eligible_pairs), size=n_samples)
+        sampled_pairs = eligible_pairs[pair_idx]
         users = sampled_pairs[:, 0].astype(np.int32, copy=False)
         positives = sampled_pairs[:, 1].astype(np.int32, copy=False)
         negatives = np.empty(n_samples, dtype=np.int32)
 
         for idx, user_idx in enumerate(users):
             seen_items = self._user_positive_items[int(user_idx)]
-            if len(seen_items) >= self._n_items:
-                raise ValueError("A user is connected to every item; cannot sample negatives.")
-
             negative_item = int(rng.integers(0, self._n_items))
             while negative_item in seen_items:
                 negative_item = int(rng.integers(0, self._n_items))

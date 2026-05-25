@@ -1,13 +1,13 @@
 ﻿# Personalization of Customer Offers Based on Banking Services User Transaction Activity
 
 ## ABSTRACT
-This thesis studies the problem of personalizing banking offers from user transaction activity under restricted access to real banking data. The work builds a reproducible recommendation pipeline that combines generation of a banking-like synthetic dataset, exploratory data analysis, training of baseline and advanced recommendation models, offline evaluation with top-K ranking metrics, and a lightweight service prototype for recommendation delivery. The implemented experimental stack includes profile similarity, item-kNN, implicit matrix factorization, Neural Collaborative Filtering, LightGCN, SASRec, and a time-decay model that emphasizes recency of user interests. In addition, the study includes bootstrap analysis, a multi-seed benchmark, and minimal transfer validation on the real Online Retail transaction log. The results show that time-aware behavioral modeling remains the strongest approach in the synthetic setting, while the real-data benchmark confirms that the pipeline transfers to real transaction logs even though the strongest model there is a simpler implicit MF baseline. The practical outcome is a reproducible research and software contour that can be extended toward real banking deployments.
+This thesis studies the problem of personalizing banking offers from user transaction activity under restricted access to real banking data. The work builds a reproducible recommendation pipeline that combines generation of a banking-like synthetic dataset, exploratory data analysis, training of baseline and advanced recommendation models, offline evaluation with top-K ranking metrics, and a lightweight service prototype for recommendation delivery. The implemented experimental stack includes profile similarity, item-kNN, implicit matrix factorization, Neural Collaborative Filtering, LightGCN, SASRec, and a time-decay model that emphasizes recency of user interests. In addition, the study includes bootstrap analysis, a multi-seed benchmark, transfer validation on the real Online Retail transaction log, and a banking-domain product-label validation on MBD-mini from Sber AI Lab. The results show that time-aware behavioral modeling remains one of the strongest approaches in the synthetic setting, while the real-data experiments confirm that model ordering changes across domains: implicit MF is strongest on Online Retail, whereas Neural CF, tuned LightGCN, and tuned SASRec are competitive on the compact MBD-mini product holdout. The practical outcome is a reproducible research and software contour that can be extended toward real banking deployments.
 
 ## KEYWORDS
 bank offer personalization; recommender systems; transaction data; implicit feedback; top-K ranking; Neural Collaborative Filtering; LightGCN; SASRec; synthetic data; FastAPI
 
 ## АННОТАЦИЯ
-В работе рассматривается задача персонализации клиентских предложений банка на основе транзакционной активности пользователя в условиях ограниченного доступа к реальным банковским данным. Цель исследования состоит в построении воспроизводимого recommendation pipeline, который объединяет генерацию banking-like синтетического датасета, разведочный анализ данных, обучение baseline- и advanced-моделей, офлайн-оценку качества по метрикам top-K ранжирования и сервисный прототип выдачи рекомендаций. В экспериментальную часть включены profile similarity, item-kNN, implicit matrix factorization, Neural Collaborative Filtering, графовая модель LightGCN и sequence-aware модель SASRec, а в качестве модели расширенного уровня предложен time-decay подход, учитывающий свежесть интересов пользователя. Дополнительно проведены bootstrap-анализ, multi-seed benchmark и минимальная валидация на реальном транзакционном retail-датасете Online Retail. Практический результат работы заключается в создании воспроизводимого исследовательского контура и рабочего API-прототипа, пригодного для дальнейшего расширения под реальные банковские данные.
+В работе рассматривается задача персонализации клиентских предложений банка на основе транзакционной активности пользователя в условиях ограниченного доступа к реальным банковским данным. Цель исследования состоит в построении воспроизводимого recommendation pipeline, который объединяет генерацию banking-like синтетического датасета, разведочный анализ данных, обучение baseline- и advanced-моделей, офлайн-оценку качества по метрикам top-K ранжирования и сервисный прототип выдачи рекомендаций. В экспериментальную часть включены profile similarity, item-kNN, implicit matrix factorization, Neural Collaborative Filtering, графовая модель LightGCN и sequence-aware модель SASRec, а в качестве модели расширенного уровня предложен time-decay подход, учитывающий свежесть интересов пользователя. Дополнительно проведены bootstrap-анализ, multi-seed benchmark, валидация на реальном транзакционном retail-датасете Online Retail и банковская product-label validation на MBD-mini от Sber AI Lab. Практический результат работы заключается в создании воспроизводимого исследовательского контура и рабочего API-прототипа, пригодного для дальнейшего расширения под реальные банковские данные.
 
 ## КЛЮЧЕВЫЕ СЛОВА
 персонализация клиентских предложений; рекомендательные системы; транзакционные данные; банковские офферы; implicit feedback; top-K ранжирование; Neural Collaborative Filtering; LightGCN; SASRec; synthetic data; FastAPI
@@ -100,6 +100,8 @@ This is especially important because banking offers are not just category labels
 Several domain-specific works demonstrate the relevance of recommendation from transaction data. Pcard by Yi et al. [9] focused on personalized restaurant recommendation from payment card transactions. The study is especially important because it shows that transaction sequences can support recommendation even without the typical retail clickstream setting. Biswas et al. [10] explored recommendation through link prediction on transactional data, showing that graph-based structures can support merchant recommendation. Baek et al. [11] studied merchant recommendation using credit card payment data and showed the importance of domain-specific features.
 
 Another especially relevant reference is the work on adaptive collaborative filtering with personalized time decay for financial product recommendation [12]. This paper provides strong domain motivation for emphasizing recency in financial recommendation. In many banking scenarios, a customer's needs change over time, and the freshest transaction evidence may better reflect short-term intent than long-run averages.
+
+The Multimodal Banking Dataset (MBD) introduced by Mollaev et al. [14] is especially important for the final validation stage of this thesis. It provides anonymized real banking event sequences and monthly product-purchase targets. The full dataset is large and multimodal, while MBD-mini preserves the same structure in a reduced form suitable for development and academic experiments. Therefore, MBD-mini is used here not as the main modeling source, but as a banking-domain product-label holdout that checks whether the pipeline can be adapted beyond the synthetic offer catalog.
 
 ### 2.8 Synthetic Data in Financial Machine Learning
 Access to real financial data is notoriously difficult due to privacy, legal, and commercial constraints. This makes reproducibility a major challenge. Boullé et al. [13] and related work on synthetic credit card transaction generation show that transaction-like data can be generated for research and testing. Synthetic data do not replace real validation, but they enable controlled experimentation, pipeline debugging, and open academic comparison.
@@ -390,6 +392,7 @@ Multiple pipeline scripts are provided:
 - a multi-seed benchmark pipeline;
 - a minimal real-data validation pipeline on a retail transaction dataset;
 - a SASRec real-data validation pipeline;
+- an MBD-mini banking product-label validation pipeline with tuned LightGCN and SASRec branches;
 - a service demo output generator;
 - a Word thesis builder.
 
@@ -404,7 +407,7 @@ An important implementation decision was not to make the heaviest graph or seque
 3. robustness analysis;
 4. practical deliverables such as an API prototype and Word draft.
 
-Within that scope, the project still implements both LightGCN and a compact SASRec branch, but treats them as auxiliary advanced validations rather than as the final production recommendation choice. This is the right trade-off for the current thesis stage. A weakly validated complex model would add technical glamour but not necessarily scientific value. In contrast, a smaller but reproducible benchmark with clear analysis is more defensible before a supervisor and a committee.
+Within that scope, the project still implements both LightGCN and a compact SASRec branch, and validates them not only on a retail transaction log but also on the MBD-mini banking product holdout. They are treated as auxiliary advanced validations rather than as the final production recommendation choice. This is the right trade-off for the current thesis stage. A weakly validated complex model would add technical glamour but not necessarily scientific value. In contrast, a smaller but reproducible benchmark with clear analysis is more defensible before a supervisor and a committee.
 
 ## 6. Experiments and Results
 ### 6.1 Experimental Setup
@@ -520,7 +523,7 @@ The real-data ranking results at `K = 10` showed a different ordering from the s
 |---|---:|---:|
 | Implicit MF | 0.1025 | 0.1296 |
 | Item KNN | 0.0742 | 0.0952 |
-| Neural CF | 0.0314 | 0.0434 |
+| Neural CF | 0.0330 | 0.0449 |
 | LightGCN | 0.0075 | 0.0114 |
 | Popularity | 0.0165 | 0.0241 |
 
@@ -528,24 +531,43 @@ In a separate sequence-aware run on the same transaction log, SASRec reached `MA
 
 This outcome is important for interpretation. It shows that the pipeline is not tied exclusively to the synthetic banking-like generator and can operate on real purchase histories. At the same time, it does not prove banking-domain validity, because retail purchases and banking transactions differ substantially. Therefore, this experiment should be interpreted as a sanity check of external reproducibility rather than as final industrial evidence.
 
-### 6.9 Why Implicit MF and Neural CF Are Weaker Here
+### 6.9 Banking Product Validation on MBD-mini
+After the pre-defense consultation, the real-data validation was extended to MBD-mini, an open banking dataset from Sber AI Lab [14]. The full MBD-mini repository contains transaction, dialog, and geo archives, but the final thesis experiment uses the lightweight `targets` component because it directly contains monthly product-propensity labels for four banking products. This choice keeps the validation reproducible on a regular laptop while still moving the experiment from a retail proxy to a banking-domain product-label task.
+
+The MBD-mini target archive contains 100,224 clients, 1,202,688 monthly target rows, and 13,529 positive product events before filtering. For the recommendation-style validation, clients with at least two positive product events were retained, which resulted in 2,325 clients and 5,443 positive product interactions. A temporal per-client holdout was then built: the latest month with a positive product label became the ground truth, while earlier positive product labels formed the training history. The final evaluated holdout contained 1,915 clients and 1,984 product-label events.
+
+Because the lightweight MBD target task contains only four product labels, the experiment is interpreted as compact banking product ranking rather than large-catalog item recommendation. The evaluation used `K = 2` and compared simple baselines with the tuned LightGCN and SASRec branches:
+
+| Model | MAP@2 | NDCG@2 |
+|---|---:|---:|
+| Neural CF | 0.6087 | 0.6419 |
+| Tuned LightGCN | 0.5815 | 0.6052 |
+| Tuned SASRec | 0.5798 | 0.5992 |
+| Implicit MF | 0.5487 | 0.5625 |
+| Popularity | 0.4601 | 0.5031 |
+| Item KNN | 0.3362 | 0.3578 |
+
+The result is useful precisely because it is not identical to either the synthetic benchmark or the Online Retail validation. Neural CF becomes the best model on the compact MBD-mini product holdout, while tuned LightGCN and tuned SASRec are close and clearly stronger than popularity and item-kNN. This supports the final interpretation that model choice is domain- and protocol-dependent. It also closes the practical post-pre-defense requirement: the pipeline was adapted to a real banking dataset with product labels, and the graph-based and sequence-aware branches were tuned on the same banking holdout rather than left as untested future work.
+
+### 6.10 Why Implicit MF and Neural CF Are Weaker Here
 The repeated underperformance of implicit MF and Neural CF on the synthetic benchmark deserves explicit interpretation. There are at least three plausible reasons. First, the offer catalog is small. Collaborative filtering often benefits from richer interaction topology and a larger item set. Second, the synthetic interaction generator is behaviorally structured around categories, which naturally favors content-aligned methods. Third, the interaction signal may not contain enough latent complexity to justify factorization or nonlinear neural scoring.
 
 This does not mean collaborative filtering or neural recommenders are unimportant in banking recommendation overall. It means only that, under the present synthetic assumptions, they are not the strongest tools. The real-data retail validation partly supports this interpretation by showing that collaborative structure becomes more useful once the benchmark is based on actual purchase logs rather than synthetic category-driven interactions.
 
-### 6.10 Representative Recommendation Cases
+### 6.11 Representative Recommendation Cases
 Qualitative inspection of sample recommendations helps interpret model behavior. For `U00001`, the service demo suggests `Balanced Finance Bundle`, `Auto and Mobility Protection`, `Mortgage Refinance Program`, `Health and Family Insurance Bundle`, and `Beginner Investment Account`. This recommendation list is coherent for a user whose behavior reflects finance, home, and mobility-linked spending.
 
 For `U00002`, the top suggestions are `Auto and Mobility Protection`, `Travel Miles Premium Card`, `Premium Lifestyle Subscription`, `EdTech Learning Subscription`, and `Digital Security Package`. This looks like a more mobile or travel-adjacent profile enriched by digital services. Such qualitative examples show that the model outputs are interpretable and business-plausible, even when the benchmark is synthetic.
 
-### 6.11 Summary of Experimental Findings
-The experiments support six key findings:
+### 6.12 Summary of Experimental Findings
+The experiments support seven key findings:
 1. transaction behavior is informative enough for useful top-K offer ranking;
 2. the profile baseline is strong and difficult to beat decisively;
 3. recency-aware modeling improves ordering quality in the reference run and remains competitive overall;
 4. lightweight semantics are competitive and become the top mean `NDCG@5` model in the multi-seed benchmark;
 5. the nonlinear Neural CF baseline improves the benchmark design but does not outperform the strongest interpretable models on the synthetic setup;
-6. minimal real-data validation shows that the pipeline transfers to real transaction logs, where collaborative structure becomes relatively more useful.
+6. Online Retail validation shows that the pipeline transfers to real transaction logs, where collaborative structure becomes relatively more useful;
+7. MBD-mini validation confirms that the same pipeline can be adapted to real banking product labels, while tuned LightGCN and SASRec become competitive but not unambiguously dominant.
 
 ## 7. Service Prototype and Deployment Considerations
 ### 7.1 Purpose of the Service Prototype
@@ -618,7 +640,7 @@ Third, semantic product representation is promising. Even a lightweight text mod
 Fourth, external validation matters. Even a small real-data experiment can change the relative ranking of models and prevent overconfident conclusions based only on synthetic benchmarks.
 
 ### 8.4 Limitations
-The thesis has several important limitations. The first limitation is external validity. The main benchmark is synthetic. This means the results cannot be directly interpreted as expected live banking conversion gains. The second limitation is catalog scale. With only fifteen offers, the candidate space is relatively small. A larger and more dynamic catalog would likely make semantic modeling and collaborative structure more important. The third limitation is evaluation protocol simplicity. The leave-last-positive holdout is reasonable, but real deployment would require temporal backtesting, campaign-aware validation, and eventually online experimentation. The fourth limitation is that the real-data validation was performed on a retail rather than banking dataset, so it should be understood only as a transferability check. The fifth limitation is model scope. The project does not yet include a full sequential Transformer or graph recommender. This was a conscious scope decision rather than a conceptual omission.
+The thesis has several important limitations. The first limitation is external validity. The main benchmark is synthetic. This means the results cannot be directly interpreted as expected live banking conversion gains. The second limitation is catalog scale. With only fifteen synthetic offers and four MBD-mini product labels, the candidate space remains relatively small. A larger and more dynamic catalog would likely make semantic modeling and collaborative structure more important. The third limitation is evaluation protocol simplicity. The leave-last-positive and temporal product-holdout protocols are reasonable offline approximations, but real deployment would require temporal backtesting, campaign-aware validation, and eventually online experimentation. The fourth limitation is that the Online Retail validation is still a retail-domain transferability check, while the MBD-mini validation uses product targets without the full transaction, dialog, and geo modalities. The fifth limitation is model scope. The project implements LightGCN and SASRec, but does not yet include a full BERT4Rec-style bidirectional sequential model. This was a conscious scope decision rather than a conceptual omission.
 
 ### 8.5 Ethical, Privacy, and Fairness Considerations
 Personalization in banking is not only a technical problem. It also raises ethical and privacy questions. Recommendations can affect financial decision-making, product exposure, and customer behavior. Therefore, a responsible system should avoid manipulative targeting, monitor bias across user groups, and ensure that the model does not expose sensitive inferred traits inappropriately.
@@ -629,19 +651,20 @@ The synthetic setup of this thesis cannot solve these issues completely, but it 
 The most promising directions for future work are:
 1. richer synthetic generation with explicit seasonality, life-event shifts, and merchant-level structure;
 2. larger offer catalogs with more nuanced textual descriptions;
-3. sequential recommendation models such as SASRec or BERT4Rec;
+3. heavier sequential recommendation models such as BERT4Rec;
 4. graph-based modeling of users, offers, merchants, and categories;
 5. counterfactual or uplift-oriented evaluation more aligned with campaign response;
-6. migration from synthetic to privacy-preserving real data in collaboration with an industrial partner.
+6. deeper use of the full MBD transaction, dialog, and geo modalities;
+7. migration from synthetic to privacy-preserving real data in collaboration with an industrial partner.
 
 These directions show that the thesis is not a closed endpoint. It is a foundation.
 
 ## 9. Conclusion
-This thesis studied personalization of banking offers from user transaction activity in a reproducible synthetic environment complemented by a minimal real-data validation experiment. The work combined literature review, synthetic dataset design, exploratory data analysis, model comparison, robustness analysis, external validation on a public retail transaction log, and service prototyping.
+This thesis studied personalization of banking offers from user transaction activity in a reproducible synthetic environment complemented by real-data validation experiments. The work combined literature review, synthetic dataset design, exploratory data analysis, model comparison, robustness analysis, external validation on a public retail transaction log, banking product-label validation on MBD-mini, and service prototyping.
 
-The project showed that transaction-driven profiles are informative enough to support nontrivial top-K recommendation quality. Among the compared models, profile similarity, hybrid semantic ranking, and time-decay weighting all performed competitively on the synthetic benchmark, while implicit matrix factorization and Neural CF were weaker there. The time-decay model produced the strongest reference-run ordering metrics, but multi-seed results demonstrated that the best non-MF models remain close. The additional Online Retail validation showed that the pipeline also transfers to real transaction logs and that collaborative structure can become more useful outside the synthetic setting. This makes careful interpretation and reproducibility more important than claiming a dramatic universal winner.
+The project showed that transaction-driven profiles are informative enough to support nontrivial top-K recommendation quality. Among the compared models, profile similarity, hybrid semantic ranking, and time-decay weighting all performed competitively on the synthetic benchmark, while implicit matrix factorization and Neural CF were weaker there. The time-decay model produced the strongest reference-run ordering metrics, but multi-seed results demonstrated that the best non-MF models remain close. The additional Online Retail validation showed that the pipeline also transfers to real transaction logs and that collaborative structure can become more useful outside the synthetic setting. The MBD-mini validation further showed that the same code contour can be adapted to real banking product labels: Neural CF became the strongest compact product-ranker, while tuned LightGCN and SASRec were competitive and substantially stronger than popularity and item-kNN. This makes careful interpretation and reproducibility more important than claiming a dramatic universal winner.
 
-The thesis therefore contributes not only a set of metrics, but a coherent methodological artifact: an end-to-end pipeline for studying banking personalization when real financial data are unavailable, plus a first sanity check on real transactional data. This outcome is valuable both as a master project result and as a foundation for further research with richer data and stronger models.
+The thesis therefore contributes not only a set of metrics, but a coherent methodological artifact: an end-to-end pipeline for studying banking personalization when direct industrial data are unavailable, plus real-data checks on both a transaction-log proxy and an open banking product-label dataset. This outcome is valuable both as a master project result and as a foundation for further research with richer data and stronger models.
 
 ## References
 1. Xiangnan He, Lizi Liao, Hanwang Zhang, Liqiang Nie, Xia Hu, Tat-Seng Chua. Neural Collaborative Filtering. 2017. URL: https://arxiv.org/abs/1708.05031 (accessed 14.03.2026).
@@ -657,6 +680,7 @@ The thesis therefore contributes not only a set of metrics, but a coherent metho
 11. Jungim Baek, et al. Merchant Recommender System Using Credit Card Payment Data. Electronics. 2023. URL: https://www.mdpi.com/2079-9292/12/4/811 (accessed 14.03.2026).
 12. Adaptive CF with Personalized Time Decay for Financial Product Recommendation. 2023. URL: https://arxiv.org/abs/2308.01208 (accessed 14.03.2026).
 13. Marc Boulle, et al. Synthesizing Credit Card Transactions. 2019. URL: https://arxiv.org/abs/1910.03033 (accessed 14.03.2026).
+14. Dzhambulat Mollaev, Alexander Kostin, Maria Postnova, Ivan Karpukhin, Ivan Kireev, Gleb Gusev, Andrey Savchenko. Multimodal Banking Dataset: Understanding Client Needs through Event Sequences. 2024. URL: https://doi.org/10.48550/arXiv.2409.17587 (accessed 18.05.2026).
 
 ## Appendix A. Synthetic Segment Logic and Category Mapping
 The following appendix provides a more operational view of how synthetic behavior segments map to dominant transaction categories. The goal is not to claim sociological realism, but to document the assumptions used by the data generator.
@@ -766,13 +790,13 @@ This appendix provides concise thesis-oriented notes on the most relevant refere
 Neural Collaborative Filtering [1] is important because it reframes latent user-item interaction as a nonlinear matching problem. For the current thesis, its main value is methodological. It establishes a strong reference point for implicit-feedback recommendation and motivates the inclusion of a collaborative baseline, even though the implementation here remains simpler than the original neural architecture.
 
 ### F.2 SASRec
-SASRec [2] is one of the most relevant sequential references for the project. Its attention-based modeling is a natural candidate for transaction histories because it can learn which recent actions matter most. The present thesis includes a compact SASRec branch on the real transaction log. In the current configuration it underperforms the strongest simpler baselines, but its implementation is still valuable because it turns the sequence-aware direction into an executed experiment rather than only a future-work claim.
+SASRec [2] is one of the most relevant sequential references for the project. Its attention-based modeling is a natural candidate for transaction histories because it can learn which recent actions matter most. The present thesis includes a compact SASRec branch on the real transaction log and a tuned SASRec run on the MBD-mini banking product holdout. On Online Retail it underperforms the strongest simpler baselines, but on MBD-mini it becomes competitive with tuned LightGCN and stronger than popularity and item-kNN. This makes the sequence-aware direction an executed experiment rather than only a future-work claim.
 
 ### F.3 BERT4Rec
-BERT4Rec [3] extends sequential recommendation by learning bidirectional contextual dependencies. This is especially relevant in domains where behavior patterns are multi-step and contextual rather than strictly next-item local. In a future version of the banking project, such a model could capture patterns like transitions from education spending to savings interest, or from home spending to refinancing offers.
+BERT4Rec [3] extends sequential recommendation by learning bidirectional contextual dependencies. This is especially relevant in domains where behavior patterns are multi-step and contextual rather than strictly next-item local. In a future version of the banking project, such a model could capture patterns like transitions from education spending to savings interest, or from home spending to refinancing offers. It was not added as a last-minute extra model because the final experimental priority was to tune the already implemented SASRec and LightGCN branches on a real banking holdout.
 
 ### F.4 LightGCN
-LightGCN [4] is central to modern graph recommendation because it simplifies graph convolution while preserving strong performance. The thesis uses this reference both as conceptual motivation and as an implemented graph baseline. In the current experiments, the LightGCN branch does not surpass the strongest profile-based or MF baselines, but it demonstrates that graph recommendation can be integrated into the same evaluation stack and compared honestly under the same reproducibility standards.
+LightGCN [4] is central to modern graph recommendation because it simplifies graph convolution while preserving strong performance. The thesis uses this reference both as conceptual motivation and as an implemented graph baseline. In the current experiments, the LightGCN branch does not surpass the strongest profile-based models on the synthetic benchmark, but it performs competitively on the MBD-mini banking product holdout after tuning. This demonstrates that graph recommendation can be integrated into the same evaluation stack and compared honestly under the same reproducibility standards.
 
 ### F.5 Wide & Deep
 Wide & Deep [5] is a foundational industrial recommendation paper because it combines memorization and generalization. In the context of this thesis, the paper is useful for thinking about how a banking recommender could combine explicit business rules or feature crosses with learned distributed representations.

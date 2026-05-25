@@ -509,6 +509,7 @@ def add_manual_numbered_paragraph(doc: Document, text: str) -> None:
     p = doc.add_paragraph()
     p.paragraph_format.left_indent = Cm(0.75)
     p.paragraph_format.first_line_indent = Cm(-0.75)
+    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     p.add_run(text)
 
 
@@ -632,6 +633,7 @@ def render_markdown_section(
                     for col_index, value in enumerate(row):
                         table.cell(row_index, col_index).text = value
                 style_table(table)
+                add_spacer(doc, lines=1, size_pt=4.0)
                 continue
 
         if re.match(r"^\d+\.\s", stripped):
